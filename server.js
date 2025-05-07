@@ -36,7 +36,7 @@ for (const [key, value] of Object.entries(requiredEnvVars)) {
 }
 
 const app = express();
-const cors = require('cors');
+
 app.use(cors({
   origin: 'https://fantasy-back-1.onrender.com', // Allow requests from this origin
   methods: ['GET', 'POST', 'DELETE'], // Allow these methods
