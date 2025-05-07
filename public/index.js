@@ -1,5 +1,5 @@
 const API_BASE_URL = "https://fantasy-back-1.onrender.com";
-const ALPHA_VANTAGE_API_KEY="6VWT72JNHHLBF3MH";
+
 
 let priceChart, financialBarChart, portfolioDoughnut;
 let portfolio = [];
