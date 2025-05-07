@@ -36,7 +36,12 @@ for (const [key, value] of Object.entries(requiredEnvVars)) {
 }
 
 const app = express();
-app.use(cors());
+const cors = require('cors');
+app.use(cors({
+  origin: 'https://fantasy-back-1.onrender.com', // Allow requests from this origin
+  methods: ['GET', 'POST', 'DELETE'], // Allow these methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
+}));
 app.use(express.json());
 
 // Session middleware
