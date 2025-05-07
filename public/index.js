@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://fantasy-back.onrender.com";
+const API_BASE_URL = "https://fantasy-back-1.onrender.com";
 let priceChart, financialBarChart, portfolioDoughnut;
 let portfolio = [];
 let financialTab = "income";
