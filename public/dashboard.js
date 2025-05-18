@@ -43,7 +43,7 @@ function logout() {
   localStorage.removeItem("guestPortfolioCount");
   localStorage.removeItem("guestAnalysisCount");
   localStorage.removeItem("guestId");
-  window.location.href = "/login.html";
+  window.location.href = "/index.html";
 }
 
 function formatDate(dateStr) {
