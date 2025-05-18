@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const TwitterStrategy = require('passport-twitter').Strategy;
+
 const session = require('express-session');
 const fetch = require('node-fetch'); // Added for Alpha Vantage routes
 require('dotenv').config();
@@ -16,9 +16,7 @@ const {
   MONGODB_URI,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET,
-  JWT_SECRET,
+JWT_SECRET,
   ALPHA_VANTAGE_API_KEY,
   SESSION_SECRET,
   PORT,
@@ -29,8 +27,7 @@ const requiredEnvVars = {
   MONGODB_URI,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET,
+
   JWT_SECRET,
   ALPHA_VANTAGE_API_KEY,
   SESSION_SECRET,
@@ -68,7 +65,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String },
   googleId: { type: String },
-  twitterId: { type: String },
+
 });
 const User = mongoose.model('User', userSchema);
 
@@ -121,27 +118,7 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-// Twitter OAuth Strategy
-passport.use(new TwitterStrategy({
-  consumerKey: TWITTER_API_KEY,
-  consumerSecret: TWITTER_API_SECRET,
-  callbackURL: 'http://localhost:5000/auth/twitter/callback',
-  includeEmail: true,
-}, async (token, tokenSecret, profile, done) => {
-  try {
-    let user = await User.findOne({ twitterId: profile.id });
-    if (!user) {
-      user = new User({
-        email: profile.emails[0].value,
-        twitterId: profile.id,
-      });
-      await user.save();
-    }
-    done(null, user);
-  } catch (err) {
-    done(err, null);
-  }
-}));
+
 
 // Middleware to verify JWT or handle guest mode
 const authenticateToken = async (req, res, next) => {
@@ -218,12 +195,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   res.redirect(`/dashboard.html?token=${token}`);
 });
 
-// Twitter OAuth Routes
-app.get('/auth/twitter', passport.authenticate('twitter'));
-app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/login.html' }), (req, res) => {
-  const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
-  res.redirect(`/index.html?token=${token}`);
-});
+
 
 // API Routes - Portfolio
 app.get('/api/portfolio', authenticateToken, async (req, res) => {
