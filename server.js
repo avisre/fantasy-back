@@ -6,9 +6,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
 const session = require('express-session');
-const fetch = require('node-fetch'); // Added for Alpha Vantage routes
+const fetch = require('node-fetch');
 require('dotenv').config();
 
 // Load environment variables
@@ -16,7 +15,7 @@ const {
   MONGODB_URI,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-JWT_SECRET,
+  JWT_SECRET,
   ALPHA_VANTAGE_API_KEY,
   SESSION_SECRET,
   PORT,
@@ -27,7 +26,6 @@ const requiredEnvVars = {
   MONGODB_URI,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-
   JWT_SECRET,
   ALPHA_VANTAGE_API_KEY,
   SESSION_SECRET,
@@ -41,9 +39,9 @@ for (const [key, value] of Object.entries(requiredEnvVars)) {
 const app = express();
 app.use(cors({
   origin: 'https://fantasy-back-1.onrender.com', // Allow requests from the frontend
-  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'], // Include OPTIONS for preflight requests
+  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, // If you need to send cookies or auth headers
+  credentials: true,
 }));
 app.use(express.json());
 
@@ -66,7 +64,6 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String },
   googleId: { type: String },
-
 });
 const User = mongoose.model('User', userSchema);
 
@@ -118,8 +115,6 @@ passport.use(new GoogleStrategy({
     done(err, null);
   }
 }));
-
-
 
 // Middleware to verify JWT or handle guest mode
 const authenticateToken = async (req, res, next) => {
@@ -195,8 +190,6 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
   res.redirect(`/dashboard.html?token=${token}`);
 });
-
-
 
 // API Routes - Portfolio
 app.get('/api/portfolio', authenticateToken, async (req, res) => {
