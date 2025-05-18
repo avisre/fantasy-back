@@ -4,65 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-      <!-- Standard SEO Meta Tags -->
-    <meta name="description" content="Welcome to stockportfolio.pro, your platform for visualizing US stock performance and analyzing fundamental data with advanced tools. Get started today!" />
-    <meta name="keywords" content="stock portfolio, US stocks, stock visualization, stock fundamentals, financial analysis, investment platform, portfolio management" />
-    <meta name="author" content="stockportfolio.pro" />
-    <meta name="robots" content="index, follow" />
-    <!-- Open Graph Meta Tags (for social media and AI crawlers) -->
-    <meta property="og:title" content="stockportfolio.pro - Visualize US Stock Performance" />
-    <meta property="og:description" content="Discover stockportfolio.pro, the ultimate platform to visualize US stock performance, analyze fundamentals, and manage your portfolio with powerful tools." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.stockportfolio.pro/" />
-    <meta property="og:image" content="https://www.stockportfolio.pro/media/success.png" />
-    <meta property="og:site_name" content="stockportfolio.pro" />
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="stockportfolio.pro - Visualize US Stock Performance" />
-    <meta name="twitter:description" content="Join stockportfolio.pro to visualize US stock performance, analyze fundamentals, and track your portfolio with cutting-edge tools." />
-    <meta name="twitter:image" content="https://www.stockportfolio.pro/media/success.png" />
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R5X6MKH91S"></script>
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-R5X6MKH91S"
+    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
       }
-      gtag('js', new Date());
-      gtag('config', 'G-R5X6MKH91S');
+      gtag("js", new Date());
+
+      gtag("config", "G-R5X6MKH91S");
     </script>
-    <!-- Structured Data (JSON-LD) for context -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "stockportfolio.pro - Welcome",
-        "description": "Welcome to stockportfolio.pro, a platform for visualizing US stock performance, analyzing fundamental data, and managing investment portfolios.",
-        "url": "https://www.stockportfolio.pro/",
-        "publisher": {
-          "@type": "Organization",
-          "name": "stockportfolio.pro",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://www.stockportfolio.pro/media/success.png"
-          }
-        },
-        "mainEntity": {
-          "@type": "WebApplication",
-          "name": "stockportfolio.pro",
-          "applicationCategory": "FinanceApplication",
-          "featureList": [
-            "Visualize US stock performance",
-            "Analyze fundamental data of US stocks",
-            "Portfolio management and performance tracking",
-            "Interactive charts for price history and portfolio breakdown",
-            "Secure authentication with email or social media",
-            "Responsive design for all devices"
-          ],
-          "operatingSystem": "Web"
-        }
-      }
-    </script>
+
+    <!-- Favicon -->
+    <link rel="icon" href="/media/chart-favicon.png" />
+
     <title>Stock Visualization Platform</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
@@ -84,51 +43,39 @@
         --danger-dark: #c82333;
       }
 
-      * {
-        box-sizing: border-box;
-      }
-
       body {
         font-family: "Inter", sans-serif;
         margin: 0;
         background-color: var(--background);
         color: var(--text-primary);
-        padding: 2vw;
+        padding: 24px;
         line-height: 1.6;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
       }
 
       .container {
         max-width: 1280px;
         margin: 0 auto;
-        padding: 2rem;
-        width: 100%;
-        flex: 1;
+        padding: 32px;
       }
 
       header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.5rem 0;
-        margin-bottom: 2.5rem;
-        flex-wrap: wrap;
-        gap: 1rem;
+        padding: 24px 0;
+        margin-bottom: 40px;
       }
 
       .nav-links {
         display: flex;
-        gap: 1.5rem;
+        gap: 24px;
         align-items: center;
-        flex-wrap: wrap;
       }
 
       .nav-links a {
         color: var(--primary);
         text-decoration: none;
-        font-size: clamp(14px, 2.5vw, 16px);
+        font-size: 16px;
         font-weight: 500;
         transition: color 0.3s ease;
       }
@@ -140,52 +87,51 @@
       .section {
         background: var(--card-bg);
         border-radius: 12px;
-        padding: 2rem;
-        margin-bottom: 2rem;
+        padding: 40px;
+        margin-bottom: 40px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
 
       h1 {
-        font-size: clamp(24px, 5vw, 32px);
+        font-size: 32px;
         font-weight: 600;
         color: var(--primary);
-        margin: 0 0 1.5rem;
+        margin: 0 0 24px;
       }
 
       h2 {
-        font-size: clamp(20px, 4vw, 24px);
+        font-size: 24px;
         font-weight: 600;
         color: var(--text-secondary);
-        margin: 1.5rem 0 1rem;
+        margin: 32px 0 16px;
       }
 
       .form-group {
-        margin-bottom: 2rem;
+        margin-bottom: 32px;
         position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
       }
 
       label {
-        font-size: clamp(14px, 2.5vw, 16px);
+        font-size: 16px;
         font-weight: 500;
         color: var(--text-secondary);
-        margin-bottom: 0.5rem;
+        margin-bottom: 12px;
+        display: block;
       }
 
       input[type="text"],
       input[type="number"],
       select {
-        padding: 0.875rem;
+        padding: 14px;
         width: 100%;
-        max-width: 100%;
+        max-width: 360px;
         background: #2c2f3a;
         border: 1px solid var(--border);
         border-radius: 8px;
         color: var(--text-primary);
-        font-size: clamp(14px, 2.5vw, 16px);
+        font-size: 16px;
         transition: border-color 0.3s ease;
+        margin-bottom: 16px;
       }
 
       input:focus,
@@ -195,16 +141,16 @@
       }
 
       button {
-        padding: 0.875rem 1.75rem;
+        padding: 14px 28px;
         background: var(--primary);
         color: var(--background);
         border: none;
         border-radius: 8px;
         font-weight: 500;
-        font-size: clamp(14px, 2.5vw, 16px);
+        font-size: 16px;
         cursor: pointer;
         transition: background 0.3s ease, transform 0.1s ease;
-        width: fit-content;
+        margin: 8px 0;
       }
 
       button:hover {
@@ -222,8 +168,8 @@
 
       .delete-btn {
         background: var(--danger);
-        padding: 0.625rem 1.25rem;
-        font-size: clamp(12px, 2vw, 14px);
+        padding: 10px 20px;
+        font-size: 14px;
       }
 
       .delete-btn:hover {
@@ -232,28 +178,27 @@
 
       canvas {
         max-height: 400px;
-        width: 100%;
-        margin: 2rem 0;
+        margin: 32px 0;
         background: #2c2f3a;
         border-radius: 8px;
-        padding: 0.75rem;
+        padding: 12px;
       }
 
       table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        font-size: clamp(14px, 2.5vw, 16px);
+        font-size: 16px;
         color: var(--text-secondary);
         background: #2c2f3a;
         border-radius: 8px;
         overflow: hidden;
-        margin: 2rem 0;
+        margin: 32px 0;
       }
 
       th,
       td {
-        padding: 1rem;
+        padding: 20px;
         text-align: left;
         border-bottom: 1px solid var(--border);
       }
@@ -276,19 +221,17 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
         border-bottom: 1px solid var(--border);
-        flex-wrap: wrap;
-        gap: 1rem;
       }
 
       .portfolio-performance {
-        font-size: clamp(16px, 3vw, 18px);
+        font-size: 18px;
         font-weight: 500;
         color: var(--text-primary);
         background: #2c2f3a;
-        padding: 1rem;
+        padding: 16px 20px;
         border-radius: 8px;
         border: 1px solid var(--border);
       }
@@ -309,15 +252,14 @@
         border-radius: 8px;
         max-height: 200px;
         overflow-y: auto;
-        width: 100%;
-        max-width: 360px;
+        width: 360px;
         z-index: 10;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        margin-top: 0.5rem;
+        margin-top: 8px;
       }
 
       .suggestion-item {
-        padding: 0.875rem;
+        padding: 14px;
         cursor: pointer;
         color: var(--text-secondary);
         transition: background 0.3s ease;
@@ -330,21 +272,19 @@
       .tabs {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
-        margin: 2rem 0;
+        gap: 16px;
+        margin: 32px 0;
       }
 
       .tab {
-        padding: 0.75rem 1.5rem;
+        padding: 12px 24px;
         background: #3a3e4a;
         color: var(--text-secondary);
         border-radius: 8px;
         cursor: pointer;
-        font-size: clamp(14px, 2.5vw, 16px);
+        font-size: 16px;
         font-weight: 500;
         transition: background 0.3s ease, color 0.3s ease;
-        flex: 1;
-        text-align: center;
       }
 
       .tab.active {
@@ -357,16 +297,14 @@
       }
 
       .unit-toggle {
-        padding: 0.75rem 1.5rem;
+        padding: 12px 24px;
         background: #3a3e4a;
         color: var(--text-secondary);
         border-radius: 8px;
         cursor: pointer;
-        font-size: clamp(14px, 2.5vw, 16px);
+        font-size: 16px;
         font-weight: 500;
         transition: background 0.3s ease;
-        flex: 1;
-        text-align: center;
       }
 
       .unit-toggle:hover {
@@ -374,204 +312,110 @@
       }
 
       .portfolio-metrics {
-        margin: 2rem 0;
-        font-size: clamp(16px, 3vw, 18px);
+        margin: 32px 0;
+        font-size: 18px;
         font-weight: 500;
         color: var(--text-primary);
         background: #2c2f3a;
-        padding: 1rem;
+        padding: 20px;
         border-radius: 8px;
         border: 1px solid var(--border);
       }
 
       .guest-notice {
         background: #3a3e4a;
-        padding: 1rem;
+        padding: 16px;
         border-radius: 8px;
-        margin-bottom: 1.5rem;
-        font-size: clamp(14px, 2.5vw, 16px);
+        margin-bottom: 24px;
+        font-size: 16px;
         color: var(--text-secondary);
-      }
-
-      /* Responsive Design */
-      @media (max-width: 1024px) {
-        .container {
-          padding: 1.5rem;
-        }
-
-        header {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 1.25rem;
-        }
-
-        .nav-links {
-          justify-content: center;
-          width: 100%;
-        }
-
-        .section {
-          padding: 1.5rem;
-        }
-
-        .form-group {
-          gap: 0.5rem;
-        }
-
-        canvas {
-          max-height: 300px;
-        }
-
-        table {
-          font-size: clamp(12px, 2vw, 14px);
-        }
-
-        th,
-        td {
-          padding: 0.75rem;
-        }
       }
 
       @media (max-width: 768px) {
         body {
-          padding: 1rem;
+          padding: 16px;
         }
 
         .container {
-          padding: 1rem;
+          padding: 24px;
         }
 
         header {
-          gap: 1rem;
-          margin-bottom: 1.5rem;
+          flex-direction: column;
+          gap: 20px;
+          margin-bottom: 32px;
         }
 
         .nav-links {
           flex-direction: column;
-          gap: 0.75rem;
-          align-items: center;
+          gap: 16px;
         }
 
         .section {
-          padding: 1rem;
-          margin-bottom: 1.5rem;
+          padding: 24px;
+          margin-bottom: 32px;
         }
 
         h1 {
-          font-size: clamp(20px, 4.5vw, 28px);
+          font-size: 28px;
+          margin-bottom: 20px;
         }
 
         h2 {
-          font-size: clamp(18px, 3.5vw, 20px);
+          font-size: 20px;
+          margin: 24px 0 12px;
         }
 
         input,
         select,
         button {
-          font-size: clamp(12px, 2vw, 14px);
-          padding: 0.75rem;
+          max-width: 100%;
+          font-size: 14px;
+          padding: 12px;
+          margin-bottom: 12px;
         }
 
         .tabs {
           flex-direction: column;
-          gap: 0.5rem;
+          align-items: flex-start;
+          gap: 12px;
+          margin: 24px 0;
         }
 
         .tab,
         .unit-toggle {
-          padding: 0.625rem;
-          font-size: clamp(12px, 2vw, 14px);
+          width: 100%;
+          text-align: center;
+          font-size: 14px;
+          padding: 10px 20px;
         }
 
         .portfolio-table-header {
           flex-direction: column;
           align-items: flex-start;
-          gap Dialling: 0.75rem;
+          gap: 20px;
+          margin-bottom: 24px;
         }
 
         .portfolio-performance {
-          font-size: clamp(14px, 2.5vw, 16px);
-          padding: 0.75rem;
           width: 100%;
+          text-align: left;
+          font-size: 16px;
+          padding: 12px 16px;
         }
 
         table {
-          display: block;
-          overflow-x: auto;
-          white-space: nowrap;
+          font-size: 14px;
+          margin: 24px 0;
         }
 
         th,
         td {
-          min-width: 120px;
+          padding: 12px;
         }
 
         canvas {
-          max-height: 250px;
-          margin: 1.5rem 0;
-        }
-
-        #suggestions,
-        #portfolioSuggestions {
-          max-width: 100%;
-        }
-      }
-
-      @media (max-width: 480px) {
-        body {
-          padding: 0.5rem;
-        }
-
-        .container {
-          padding: 0.5rem;
-        }
-
-        .section {
-          padding: 0.75rem;
-        }
-
-        h1 {
-          font-size: clamp(18px, 4vw, 24px);
-        }
-
-        h2 {
-          font-size: clamp(16px, 3vw, 18px);
-        }
-
-        input,
-        select,
-        button {
-          padding: 0.625rem;
-          font-size: clamp(11px, 1.8vw, 13px);
-        }
-
-        .form-group {
-          margin-bottom: 1rem;
-        }
-
-        .tabs {
-          margin: 1rem 0;
-        }
-
-        canvas {
-          max-height: 200px;
-        }
-
-        .portfolio-metrics,
-        .portfolio-performance,
-        .guest-notice {
-          font-size: clamp(12px, 2vw, 14px);
-          padding: 0.625rem;
-        }
-
-        table {
-          font-size: clamp(11px, 1.8vw, 13px);
-        }
-
-        th,
-        td {
-          padding: 0.5rem;
-          min-width: 100px;
+          margin: 24px 0;
         }
       }
     </style>
