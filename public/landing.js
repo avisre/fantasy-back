@@ -1,26 +1,37 @@
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('Landing page loaded');
 
-      // Add smooth scroll for navigation links
-      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-        anchor.addEventListener("click", function (e) {
-          e.preventDefault();
-          document.querySelector(this.getAttribute("href")).scrollIntoView({
-            behavior: "smooth",
-          });
-        });
-      });
+  // Add handler for Google OAuth login
+  const googleLoginButton = document.getElementById('googleLoginButton');
+  if (googleLoginButton) {
+    googleLoginButton.addEventListener('click', () => {
+      window.location.href = 'https://fantasy-back.onrender.com/auth/google';
+    });
+  }
 
-      // Trigger fade-in animation on scroll
-      const sections = document.querySelectorAll(".section, .hero");
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.style.animation = "fadeIn 1s ease-in-out forwards";
-            }
-          });
-        },
-        { threshold: 0.2 }
-      );
+  // Add handler for guest mode
+  const guestModeButton = document.getElementById('guestModeButton');
+  if (guestModeButton) {
+    guestModeButton.addEventListener('click', enterGuestMode);
+  }
 
-      sections.forEach((section) => observer.observe(section));
- 
+  // Add handler for logout
+  const logoutButton = document.querySelector('.logout-btn');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("guestMode");
+      localStorage.removeItem("guestPortfolioCount");
+      localStorage.removeItem("guestAnalysisCount");
+      localStorage.removeItem("guestId");
+      window.location.href = "/login.html";
+    });
+  }
+});
+
+function enterGuestMode() {
+  localStorage.setItem("guestMode", "true");
+  localStorage.setItem("guestPortfolioCount", "0");
+  localStorage.setItem("guestAnalysisCount", "0");
+  window.location.href = "/dashboard.html";
+}
