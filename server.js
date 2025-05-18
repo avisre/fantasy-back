@@ -2,11 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const TwitterStrategy = require('passport-twitter').Strategy;
 const session = require('express-session');
-const fetch = require('node-fetch');
 require('dotenv').config();
 
 // Load environment variables
@@ -14,33 +15,16 @@ const {
   MONGODB_URI,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
+  TWITTER_API_KEY,
+  TWITTER_API_SECRET,
   JWT_SECRET,
   ALPHA_VANTAGE_API_KEY,
   SESSION_SECRET,
   PORT,
 } = process.env;
 
-// Validate required environment variables
-const requiredEnvVars = {
-  MONGODB_URI,
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  JWT_SECRET,
-  ALPHA_VANTAGE_API_KEY,
-  SESSION_SECRET,
-};
-for (const [key, value] of Object.entries(requiredEnvVars)) {
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-}
-
 const app = express();
-app.use(cors({
-  origin: 'https://fantasy-back-1.onrender.com', // Allow requests from this origin
-  methods: ['GET', 'POST', 'DELETE'], // Allow these methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
-}));
+app.use(cors());
 app.use(express.json());
 
 // Session middleware
@@ -60,7 +44,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // MongoDB Schemas
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
+  password: { type: String },
   googleId: { type: String },
+  twitterId: { type: String },
 });
 const User = mongoose.model('User', userSchema);
 
@@ -96,7 +82,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://fantasy-back-1.onrender.com/auth/google/callback',
+  callbackURL: 'http://localhost:5000/auth/google/callback',
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
@@ -104,6 +90,28 @@ passport.use(new GoogleStrategy({
       user = new User({
         email: profile.emails[0].value,
         googleId: profile.id,
+      });
+      await user.save();
+    }
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+}));
+
+// Twitter OAuth Strategy
+passport.use(new TwitterStrategy({
+  consumerKey: TWITTER_API_KEY,
+  consumerSecret: TWITTER_API_SECRET,
+  callbackURL: 'http://localhost:5000/auth/twitter/callback',
+  includeEmail: true,
+}, async (token, tokenSecret, profile, done) => {
+  try {
+    let user = await User.findOne({ twitterId: profile.id });
+    if (!user) {
+      user = new User({
+        email: profile.emails[0].value,
+        twitterId: profile.id,
       });
       await user.save();
     }
@@ -139,6 +147,50 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
+// API Routes - Authentication
+app.post('/api/register', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ email, password: hashedPassword });
+    await user.save();
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+    res.status(201).json({ message: 'User registered', token });
+  } catch (error) {
+    console.error('Register error:', error.message);
+    res.status(500).json({ error: 'Failed to register' });
+  }
+});
+
+app.post('/api/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+    const user = await User.findOne({ email });
+    if (!user || !user.password) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+    res.status(200).json({ message: 'Login successful', token });
+  } catch (error) {
+    console.error('Login error:', error.message);
+    res.status(500).json({ error: 'Failed to login' });
+  }
+});
+
 // Google OAuth Routes
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
@@ -146,8 +198,14 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   res.redirect(`/dashboard.html?token=${token}`);
 });
 
-// API Routes - Portfolio
+// Twitter OAuth Routes
+app.get('/auth/twitter', passport.authenticate('twitter'));
+app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/login.html' }), (req, res) => {
+  const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
+  res.redirect(`/index.html?token=${token}`);
+});
 
+// API Routes - Portfolio
 app.get('/api/portfolio', authenticateToken, async (req, res) => {
   try {
     console.log('Fetching portfolio for userId:', req.user.id); // Debug log
@@ -400,12 +458,12 @@ app.get('/api/stock/global-quote', async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
 });
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-});
 
 app.get('/login.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+app.get('/dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/register.html', (req, res) => {
