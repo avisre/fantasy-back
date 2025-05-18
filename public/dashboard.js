@@ -1,4 +1,6 @@
-const API_BASE_URL = "https://fantasy-back.onrender.com";
+const API_BASE_URL = "https://fantasy-back-1.onrender.com";
+
+
 let priceChart, financialBarChart, portfolioDoughnut;
 let portfolio = [];
 let financialTab = "income";
@@ -43,7 +45,7 @@ function logout() {
   localStorage.removeItem("guestPortfolioCount");
   localStorage.removeItem("guestAnalysisCount");
   localStorage.removeItem("guestId");
-  window.location.href = "/index.html";
+  window.location.href = "/login.html";
 }
 
 function formatDate(dateStr) {
