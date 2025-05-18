@@ -36,7 +36,11 @@ for (const [key, value] of Object.entries(requiredEnvVars)) {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://fantasy-back-1.onrender.com', // Allow requests from this origin
+  methods: ['GET', 'POST', 'DELETE'], // Allow these methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
+}));
 app.use(express.json());
 
 // Session middleware
@@ -92,7 +96,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/auth/google/callback',
+  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://fantasy-back-1.onrender.com/auth/google/callback',
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
