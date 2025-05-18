@@ -11,7 +11,7 @@
           if (!response.ok)
             throw new Error(data.error || "Registration failed");
           localStorage.setItem("token", data.token);
-          window.location.href = "/index.html";
+          window.location.href = "/dashboard.html";
         } catch (error) {
           alert("Error: " + error.message);
         }
