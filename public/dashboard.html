@@ -3,72 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Standard SEO Meta Tags -->
-    <meta name="description" content="Access the stockportfolio.pro dashboard to visualize US stock performance, analyze company fundamentals, and track your portfolio with interactive charts." />
-    <meta name="keywords" content="stock portfolio, US stocks, stock visualization, stock fundamentals, portfolio tracker, financial analysis, investment dashboard" />
-    <meta name="author" content="stockportfolio.pro" />
-    <meta name="robots" content="index, follow" />
-    <!-- Open Graph Meta Tags (for social media and AI crawlers) -->
-    <meta property="og:title" content="Dashboard - stockportfolio.pro" />
-    <meta property="og:description" content="Use the stockportfolio.pro dashboard to analyze US stock fundamentals, visualize performance, and manage your investment portfolio with real-time data." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.stockportfolio.pro/dashboard.html" />
-    <meta property="og:image" content="https://www.stockportfolio.pro/media/success.png" />
-    <meta property="og:site_name" content="stockportfolio.pro" />
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Dashboard - stockportfolio.pro" />
-    <meta name="twitter:description" content="Track US stock performance, analyze fundamentals, and manage your portfolio on the stockportfolio.pro dashboard with advanced visualization tools." />
-    <meta name="twitter:image" content="https://www.stockportfolio.pro/media/success.png" />
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R5X6MKH91S"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-R5X6MKH91S"
+    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
       }
-      gtag('js', new Date());
-      gtag('config', 'G-R5X6MKH91S');
+      gtag("js", new Date());
+
+      gtag("config", "G-R5X6MKH91S");
     </script>
-    <!-- Structured Data (JSON-LD) for context -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Dashboard - stockportfolio.pro",
-        "description": "The stockportfolio.pro dashboard allows users to visualize US stock performance, analyze company fundamentals, and track investment portfolios with interactive charts.",
-        "url": "https://www.stockportfolio.pro/dashboard.html",
-        "publisher": {
-          "@type": "Organization",
-          "name": "stockportfolio.pro",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://www.stockportfolio.pro/media/success.png"
-          }
-        },
-        "mainEntity": {
-          "@type": "WebApplication",
-          "name": "stockportfolio.pro Dashboard",
-          "applicationCategory": "FinanceApplication",
-          "featureList": [
-            "Visualize US stock price history (1 year, 5 years, since inception)",
-            "Analyze company fundamentals (income, balance sheet, cash flow)",
-            "Track portfolio performance with real-time updates",
-            "Interactive charts for portfolio breakdown and financial metrics",
-            "Guest mode with limited stock and analysis capabilities"
-          ],
-          "operatingSystem": "Web"
-        }
-      }
-    </script>
-    <title>Dashboard - stockportfolio.pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <!-- Favicon -->
-    <link rel="icon" href="/media/success.png" />
+    <link rel="icon" href="/media/chart-favicon.png" />
+
+    <title>Stock Visualization Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <style>
       :root {
         --primary: #f0b90b;
@@ -104,13 +64,6 @@
         align-items: center;
         padding: 24px 0;
         margin-bottom: 40px;
-      }
-
-      .header-title {
-        font-size: 32px;
-        font-weight: 600;
-        color: var(--primary);
-        margin: 0;
       }
 
       .nav-links {
@@ -229,7 +182,6 @@
         background: #2c2f3a;
         border-radius: 8px;
         padding: 12px;
-        width: 100%;
       }
 
       table {
@@ -300,8 +252,7 @@
         border-radius: 8px;
         max-height: 200px;
         overflow-y: auto;
-        width: 100%;
-        max-width: 360px;
+        width: 360px;
         z-index: 10;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         margin-top: 8px;
@@ -380,15 +331,6 @@
         color: var(--text-secondary);
       }
 
-      /* Responsive Table for Portfolio */
-      #portfolioTable {
-        border: none;
-      }
-
-      #portfolioTable th {
-        position: relative;
-      }
-
       @media (max-width: 768px) {
         body {
           padding: 16px;
@@ -402,11 +344,6 @@
           flex-direction: column;
           gap: 20px;
           margin-bottom: 32px;
-        }
-
-        .header-title {
-          font-size: 28px;
-          margin-bottom: 20px;
         }
 
         .nav-links {
@@ -479,145 +416,6 @@
 
         canvas {
           margin: 24px 0;
-          max-height: 300px;
-        }
-
-        /* Centered Responsive Table Styling for Mobile */
-        #portfolioTable {
-          display: block;
-          overflow-x: auto;
-          white-space: nowrap;
-        }
-
-        #portfolioTable thead,
-        #portfolioTable tbody,
-        #portfolioTable tr,
-        #portfolioTable th,
-        #portfolioTable td {
-          display: block;
-        }
-
-        #portfolioTable thead {
-          display: none; /* Hide headers on mobile, use data-labels */
-        }
-
-        #portfolioTable tr {
-          margin-bottom: 16px;
-          border-bottom: 2px solid var(--border);
-          background: #2c2f3a;
-          border-radius: 8px;
-          padding: 10px;
-        }
-
-        #portfolioTable td {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 10px 12px;
-          border-bottom: none;
-          text-align: center;
-          font-size: 14px;
-        }
-
-        #portfolioTable td::before {
-          content: attr(data-label);
-          font-weight: 600;
-          color: var(--text-primary);
-          text-align: left;
-          flex: 1;
-          white-space: nowrap;
-        }
-
-        #portfolioTable td:not(:last-child) {
-          border-bottom: 1px solid var(--border);
-        }
-
-        #portfolioTable .delete-btn {
-          width: 100%;
-          max-width: 300px;
-          text-align: center;
-          padding: 8px;
-          font-size: 13px;
-          margin: 0 auto;
-        }
-      }
-
-      @media (max-width: 480px) {
-        body {
-          padding: 12px;
-        }
-
-        .container {
-          padding: 24px;
-        }
-
-        .header-title {
-          font-size: 24px;
-          margin-bottom: 16px;
-        }
-
-        h1 {
-          font-size: 24px;
-          margin-bottom: 16px;
-        }
-
-        h2 {
-          font-size: 18px;
-          margin: 20px 0 12px;
-        }
-
-        input,
-        select,
-        button {
-          font-size: 13px;
-          padding: 10px;
-          margin-bottom: 10px;
-        }
-
-        .tabs {
-          gap: 10px;
-          margin: 20px 0;
-        }
-
-        .tab,
-        .unit-toggle {
-          font-size: 13px;
-          padding: 8px 16px;
-        }
-
-        .portfolio-table-header {
-          gap: 16px;
-          margin-bottom: 20px;
-        }
-
-        .portfolio-performance {
-          font-size: 14px;
-          padding: 10px 12px;
-        }
-
-        table {
-          font-size: 13px;
-          margin: 20px 0;
-        }
-
-        th,
-        td {
-          padding: 10px;
-        }
-
-        canvas {
-          margin: 20px 0;
-          max-height: 250px;
-        }
-
-        #portfolioTable td {
-          font-size: 13px;
-          padding: 8px 10px;
-        }
-
-        #portfolioTable .delete-btn {
-          font-size: 12px;
-          padding: 6px;
         }
       }
     </style>
@@ -625,7 +423,7 @@
   <body>
     <div class="container">
       <header>
-        <div class="header-title">Dashboard</div>
+        <h1>Stock Visualization Platform</h1>
         <div class="nav-links">
           <a href="/landing.html">Home</a>
           <button class="logout-btn" onclick="logout()">Logout</button>
@@ -744,17 +542,7 @@
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="portfolioList">
-            <!-- Example row for reference; actual data populated by dashboard.js -->
-            <!-- <tr>
-              <td data-label="Symbol">TSLA</td>
-              <td data-label="Shares">10</td>
-              <td data-label="Purchase Price">$150.00</td>
-              <td data-label="Current Price">$200.00</td>
-              <td data-label="Gain/Loss" class="gain-positive">$500.00</td>
-              <td data-label="Actions"><button class="delete-btn" onclick="deleteFromPortfolio('TSLA')">Delete</button></td>
-            </tr> -->
-          </tbody>
+          <tbody id="portfolioList"></tbody>
         </table>
       </div>
     </div>
