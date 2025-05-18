@@ -40,9 +40,10 @@ for (const [key, value] of Object.entries(requiredEnvVars)) {
 
 const app = express();
 app.use(cors({
-  origin: 'https://fantasy-back-1.onrender.com', // For local testing; update to 'https://fantasy-back.onrender.com' for production
-  methods: ['GET', 'POST', 'DELETE'],
+  origin: 'https://fantasy-back-1.onrender.com', // Allow requests from the frontend
+  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'], // Include OPTIONS for preflight requests
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // If you need to send cookies or auth headers
 }));
 app.use(express.json());
 
