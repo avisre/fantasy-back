@@ -427,6 +427,7 @@ app.get('/api/stock/global-quote', async (req, res) => {
   }
 });
 
+
 // Serve Pages
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
