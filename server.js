@@ -6,8 +6,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const TwitterStrategy = require('passport-twitter').Strategy;
 const session = require('express-session');
-const fetch = require('node-fetch');
 require('dotenv').config();
 
 // Load environment variables
@@ -15,34 +15,16 @@ const {
   MONGODB_URI,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
+  TWITTER_API_KEY,
+  TWITTER_API_SECRET,
   JWT_SECRET,
   ALPHA_VANTAGE_API_KEY,
   SESSION_SECRET,
   PORT,
 } = process.env;
 
-// Validate required environment variables
-const requiredEnvVars = {
-  MONGODB_URI,
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  JWT_SECRET,
-  ALPHA_VANTAGE_API_KEY,
-  SESSION_SECRET,
-};
-for (const [key, value] of Object.entries(requiredEnvVars)) {
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-}
-
 const app = express();
-app.use(cors({
-  origin: 'https://fantasy-back-1.onrender.com', // Allow requests from the frontend
-  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
+app.use(cors());
 app.use(express.json());
 
 // Session middleware
@@ -64,6 +46,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String },
   googleId: { type: String },
+  twitterId: { type: String },
 });
 const User = mongoose.model('User', userSchema);
 
@@ -72,7 +55,7 @@ const portfolioSchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
   price: { type: Number, required: true },
   timestamp: { type: Date, default: Date.now },
-  userId: { type: String, required: true },
+  userId: { type: String, required: true }, // Supports both MongoDB ObjectId and unique guest IDs
 });
 const Portfolio = mongoose.model('Portfolio', portfolioSchema);
 
@@ -99,7 +82,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.GOOGLE_CALLBACK_URL,
+  callbackURL: 'http://localhost:5000/auth/google/callback',
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
@@ -116,23 +99,47 @@ passport.use(new GoogleStrategy({
   }
 }));
 
+// Twitter OAuth Strategy
+passport.use(new TwitterStrategy({
+  consumerKey: TWITTER_API_KEY,
+  consumerSecret: TWITTER_API_SECRET,
+  callbackURL: 'http://localhost:5000/auth/twitter/callback',
+  includeEmail: true,
+}, async (token, tokenSecret, profile, done) => {
+  try {
+    let user = await User.findOne({ twitterId: profile.id });
+    if (!user) {
+      user = new User({
+        email: profile.emails[0].value,
+        twitterId: profile.id,
+      });
+      await user.save();
+    }
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+}));
+
 // Middleware to verify JWT or handle guest mode
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   if (token) {
     try {
+      // Check if the token is a guest ID (starts with "guest_")
       if (token.startsWith('guest_')) {
         req.user = { id: token };
         next();
       } else {
+        // Otherwise, it's a JWT token for a logged-in user
         const decoded = jwt.verify(token, JWT_SECRET);
-        console.log('JWT decoded:', decoded);
-        req.user = { id: decoded.id.toString() };
+        console.log('JWT decoded:', decoded); // Debug log
+        req.user = { id: decoded.id.toString() }; // Ensure userId is a string
         next();
       }
     } catch (err) {
-      console.error('Token verification error:', err);
+      console.error('Token verification error:', err); // Debug log
       return res.status(403).json({ error: 'Invalid or expired token' });
     }
   } else {
@@ -191,12 +198,19 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   res.redirect(`/dashboard.html?token=${token}`);
 });
 
+// Twitter OAuth Routes
+app.get('/auth/twitter', passport.authenticate('twitter'));
+app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/login.html' }), (req, res) => {
+  const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
+  res.redirect(`/index.html?token=${token}`);
+});
+
 // API Routes - Portfolio
 app.get('/api/portfolio', authenticateToken, async (req, res) => {
   try {
-    console.log('Fetching portfolio for userId:', req.user.id);
+    console.log('Fetching portfolio for userId:', req.user.id); // Debug log
     const portfolio = await Portfolio.find({ userId: req.user.id });
-    console.log('Portfolio found:', portfolio);
+    console.log('Portfolio found:', portfolio); // Debug log
     res.json(portfolio);
   } catch (error) {
     console.error('GET /api/portfolio error:', error.message);
@@ -210,6 +224,7 @@ app.post('/api/portfolio', authenticateToken, async (req, res) => {
     if (!symbol || !quantity || !price) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+    // Enforce portfolio limit for guest users
     if (req.user.id.startsWith('guest_')) {
       const portfolioCount = await Portfolio.countDocuments({ userId: req.user.id });
       if (portfolioCount >= 5) {
@@ -244,14 +259,19 @@ app.post('/api/portfolio/migrate', authenticateToken, async (req, res) => {
     if (req.user.id.startsWith('guest_')) {
       return res.status(400).json({ error: 'Cannot migrate portfolio for guest user' });
     }
+
     const guestId = req.headers['x-guest-id'];
     if (!guestId || !guestId.startsWith('guest_')) {
       return res.status(400).json({ error: 'Invalid guest ID' });
     }
+
+    // Find all portfolio entries for the guest user
     const guestPortfolio = await Portfolio.find({ userId: guestId });
     if (guestPortfolio.length === 0) {
       return res.status(200).json({ message: 'No guest portfolio to migrate' });
     }
+
+    // Update the userId of all guest portfolio entries to the logged-in user's userId
     const result = await Portfolio.updateMany(
       { userId: guestId },
       { $set: { userId: req.user.id } }
@@ -442,7 +462,6 @@ app.get('/', (req, res) => {
 app.get('/login.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
-
 app.get('/dashboard.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
