@@ -36,12 +36,7 @@ for (const [key, value] of Object.entries(requiredEnvVars)) {
 }
 
 const app = express();
-
-app.use(cors({
-  origin: 'https://fantasy-back-1.onrender.com', // Allow requests from this origin
-  methods: ['GET', 'POST', 'DELETE'], // Allow these methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
-}));
+app.use(cors());
 app.use(express.json());
 
 // Session middleware
@@ -97,7 +92,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://fantasy-back-1.onrender.com/auth/google/callback',
+  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/auth/google/callback',
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
@@ -144,10 +139,11 @@ const authenticateToken = async (req, res, next) => {
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
   const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
-  res.redirect(`/index.html?token=${token}`);
+  res.redirect(`/dashboard.html?token=${token}`);
 });
 
 // API Routes - Portfolio
+
 app.get('/api/portfolio', authenticateToken, async (req, res) => {
   try {
     console.log('Fetching portfolio for userId:', req.user.id); // Debug log
@@ -399,6 +395,9 @@ app.get('/api/stock/global-quote', async (req, res) => {
 // Serve Pages
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+});
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/login.html', (req, res) => {
