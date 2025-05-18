@@ -40,7 +40,7 @@ for (const [key, value] of Object.entries(requiredEnvVars)) {
 
 const app = express();
 app.use(cors({
-  origin: 'http://localhost:5000', // For local testing; update to 'https://fantasy-back.onrender.com' for production
+  origin: 'https://fantasy-back-1.onrender.com', // For local testing; update to 'https://fantasy-back.onrender.com' for production
   methods: ['GET', 'POST', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
