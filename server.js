@@ -81,7 +81,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://fantasy-back-1.onrender.com/auth/google/callback',
+  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://www.stockportfolio.pro/auth/google/callback',
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
