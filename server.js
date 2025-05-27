@@ -404,12 +404,15 @@ app.get('/api/stock/global-quote', async (req, res) => {
   }
 });
 
-// News Route
+// Updated News Route to Support Filters
 app.get('/api/news', authenticateToken, async (req, res) => {
   try {
-    const response = await fetch(
-      `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&apikey=${ALPHA_VANTAGE_API_KEY}`
-    );
+    const { tickers, topics } = req.query;
+    let url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&limit=1000&apikey=${ALPHA_VANTAGE_API_KEY}`;
+    if (tickers) url += `&tickers=${encodeURIComponent(tickers)}`;
+    if (topics) url += `&topics=${encodeURIComponent(topics)}`;
+
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Alpha Vantage API responded with status: ${response.status}`);
     }
