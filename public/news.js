@@ -1,12 +1,19 @@
-const API_BASE_URL = "https://fantasy-back-1.onrender.com"; // Your backend URL
-const ALPHA_VANTAGE_API_KEY = "YOUR_ALPHA_VANTAGE_API_KEY"; // Replace with your key
+const API_BASE_URL = "https://fantasy-back-1.onrender.com"; // Replace with your backend URL
 
 async function fetchNews() {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/stock/news?apikey=${ALPHA_VANTAGE_API_KEY}&limit=1000`
-    );
-    if (!response.ok) throw new Error("Failed to fetch news");
+    const response = await fetch(`${API_BASE_URL}/api/news`, {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token") || guestId}`,
+      },
+    });
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        alert("Session expired. Please log in again.");
+        logout();
+      }
+      throw new Error("Failed to fetch news");
+    }
     const newsData = await response.json();
     displayNews(newsData);
   } catch (error) {
@@ -15,6 +22,8 @@ async function fetchNews() {
       "<p>Failed to load news. Please try again later.</p>";
   }
 }
+
+// Existing displayNews function remains unchanged
 
 function displayNews(newsData) {
   const newsList = document.getElementById("newsList");
