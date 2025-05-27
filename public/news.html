@@ -1,412 +1,382 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Financial News</title>
-  <!-- Fixed Font Import -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #f0b90b;
-      --primary-dark: #d4a009;
-      --background: #1a1c24;
-      --card-bg: #21232c;
-      --text-primary: #ffffff;
-      --text-secondary: #d3d5db;
-      --border: #3a3e4a;
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: "Inter", sans-serif;
-      background-color: var(--background);
-      color: var(--text-primary);
-      padding: 2vw;
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 2rem;
-      width: 100%;
-      flex: 1;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem 0;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .nav-links a {
-      color: var(--primary);
-      text-decoration: none;
-      font-size: clamp(14px, 2.5vw, 16px);
-      font-weight: 500;
-      transition: color 0.3s ease;
-      cursor: pointer;
-    }
-    .nav-links a:hover {
-      color: var(--text-primary);
-    }
-    h1 {
-      font-size: clamp(24px, 5vw, 32px);
-      font-weight: 600;
-      color: var(--primary);
-      margin: 0 0 1.5rem;
-    }
-    .filter-bar {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-    }
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-    }
-    .filter-group label {
-      font-size: clamp(14px, 2.5vw, 16px);
-      font-weight: 500;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
-    }
-    #tickers {
-      padding: 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #2c2f3a;
-      color: var(--text-primary);
-      font-size: clamp(14px, 2.5vw, 16px);
-      width: 200px;
-    }
-    .topics {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      max-height: 150px;
-      overflow-y: auto;
-      padding: 0.5rem;
-      background: #2c2f3a;
-      border-radius: 8px;
-    }
-    .topic {
-      padding: 0.5rem 1rem;
-      background: #3a3e4a;
-      color: var(--text-secondary);
-      border: none;
-      border-radius: 8px;
-      font-size: clamp(12px, 2vw, 14px);
-      cursor: pointer;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-    .topic.active {
-      background: var(--primary);
-      color: var(--background);
-    }
-    button#apply-filters {
-      padding: 0.75rem 1.5rem;
-      background: var(--primary);
-      color: var(--background);
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: clamp(14px, 2.5vw, 16px);
-      transition: background 0.3s ease;
-    }
-    button#apply-filters:hover {
-      background: var(--primary-dark);
-    }
-    .hero-article {
-      display: flex;
-      gap: 1.5rem;
-      background: var(--card-bg);
-      padding: 2rem;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      transition: transform 0.3s ease;
-    }
-    .hero-article:hover {
-      transform: translateY(-5px);
-    }
-    .hero-image-container img {
-      width: 100%;
-      max-width: 400px;
-      height: auto;
-      max-height: 250px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-    .hero-content {
-      flex: 1;
-    }
-    .hero-content h3 a {
-      color: var(--primary);
-      font-size: clamp(20px, 4vw, 24px);
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-    .hero-content h3 a:hover {
-      color: var(--primary-dark);
-    }
-    .hero-content p {
-      color: var(--text-secondary);
-      font-size: clamp(16px, 3vw, 18px);
-      margin-bottom: 1rem;
-    }
-    .hero-content a:not(h3 a) {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-    .hero-content a:not(h3 a):hover {
-      color: var(--primary-dark);
-      text-decoration: underline;
-    }
-    .hero-content .news-time {
-      font-size: clamp(14px, 2.5vw, 16px);
-      color: #6c757d;
-    }
-    .news-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-    }
-    .news-item {
-      display: flex;
-      flex-direction: column;
-      background: var(--card-bg);
-      padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      transition: transform 0.3s ease;
-    }
-    .news-item:hover {
-      transform: translateY(-5px);
-    }
-    .image-container img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-    }
-    .content h3 a {
-      color: var(--primary);
-      font-size: clamp(16px, 3vw, 18px);
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-    .content h3 a:hover {
-      color: var(--primary-dark);
-    }
-    .content p {
-      color: var(--text-secondary);
-      font-size: clamp(14px, 2.5vw, 16px);
-      margin-bottom: 0.75rem;
-    }
-    .content a:not(h3 a) {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-    .content a:not(h3 a):hover {
-      color: var(--primary-dark);
-      text-decoration: underline;
-    }
-    .content .news-time {
-      font-size: clamp(12px, 2vw, 14px);
-      color: #6c757d;
-    }
-    @media (max-width: 1024px) {
-      .news-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    @media (max-width: 768px) {
-      .news-grid {
-        grid-template-columns: 1fr;
-      }
-      .hero-article {
-        flex-direction: column;
-      }
-    }
-    @media (max-width: 480px) {
-      .hero-content h3 a,
-      .content h3 a {
-        font-size: clamp(14px, 2.5vw, 16px);
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1>Financial News</h1>
-      <div class="nav-links">
-        <a href="#" onclick="navigateTo('dashboard')">Dashboard</a>
-        <a href="#" onclick="navigateTo('home')">Home</a>
-      </div>
-    </header>
 
-    <div class="filter-bar">
-      <div class="filter-group">
-        <label for="tickers">Tickers</label>
-        <input type="text" id="tickers" placeholder="e.g., IBM,TSLA">
-      </div>
-      <div class="filter-group">
-        <label>Topics</label>
-        <div class="topics">
-          <button class="topic" data-topic="blockchain">Blockchain</button>
-          <button class="topic" data-topic="earnings">Earnings</button>
-          <button class="topic" data-topic="ipo">IPO</button>
-          <button class="topic" data-topic="mergers_and_acquisitions">Mergers & Acquisitions</button>
-          <button class="topic" data-topic="financial_markets">Financial Markets</button>
-          <button class="topic" data-topic="economy_fiscal">Economy - Fiscal Policy</button>
-          <button class="topic" data-topic="economy_monetary">Economy - Monetary Policy</button>
-          <button class="topic" data-topic="economy_macro">Economy - Macro/Overall</button>
-          <button class="topic" data-topic="energy_transportation">Energy & Transportation</button>
-          <button class="topic" data-topic="finance">Finance</button>
-          <button class="topic" data-topic="life_sciences">Life Sciences</button>
-          <button class="topic" data-topic="manufacturing">Manufacturing</button>
-          <button class="topic" data-topic="real_estate">Real Estate & Construction</button>
-          <button class="topic" data-topic="retail_wholesale">Retail & Wholesale</button>
-          <button class="topic" data-topic="technology">Technology</button>
-        </div>
-      </div>
-      <button id="apply-filters">Apply Filters</button>
-    </div>
-
-    <div id="heroArticle" class="hero-article"><p>Loading latest news...</p></div>
-    <div class="news-grid" id="newsList"><p>Loading news...</p></div>
-  </div>
-
-  <script>
-    const ALPHA_VANTAGE_API_KEY = "6VWT72JNHHLBF3MH"; // Replace with your actual key
-    let selectedTopics = new Set();
-
-    function truncateText(text, maxLength = 150) {
-      return text && text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-    }
-
-    function getRelativeTime(time) {
-      const published = new Date(time);
-      const now = new Date();
-      const seconds = Math.floor((now - published) / 1000);
-      const units = [
-        { label: 'year', seconds: 31536000 },
-        { label: 'month', seconds: 2592000 },
-        { label: 'week', seconds: 604800 },
-        { label: 'day', seconds: 86400 },
-        { label: 'hour', seconds: 3600 },
-        { label: 'minute', seconds: 60 },
-        { label: 'second', seconds: 1 },
-      ];
-      for (let { label, seconds: s } of units) {
-        const value = Math.floor(seconds / s);
-        if (value >= 1) return `${value} ${label}${value > 1 ? 's' : ''} ago`;
-      }
-      return "just now";
-    }
-
-    async function fetchNews() {
-      const tickers = document.getElementById("tickers").value.trim();
-      const topics = Array.from(selectedTopics).join(',');
-      let url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&apikey=${ALPHA_VANTAGE_API_KEY}`;
-      if (tickers) url += `&tickers=${encodeURIComponent(tickers)}`;
-      if (topics) url += `&topics=${encodeURIComponent(topics)}`;
-
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (!data.feed) throw new Error(data["Error Message"] || "No news found.");
-        displayNews(data.feed);
-      } catch (err) {
-        document.getElementById("heroArticle").innerHTML = "<p>⚠️ Failed to load news.</p>";
-        document.getElementById("newsList").innerHTML = "<p>⚠️ Please try again later.</p>";
-      }
-    }
-
-    function displayNews(articles) {
-      const heroArticle = document.getElementById("heroArticle");
-      const newsList = document.getElementById("newsList");
-      heroArticle.innerHTML = "";
-      newsList.innerHTML = "";
-
-      if (articles.length === 0) {
-        heroArticle.innerHTML = "<p>No news found.</p>";
-        newsList.innerHTML = "<p>No news available.</p>";
-        return;
-      }
-
-      const hero = articles[0];
-      heroArticle.innerHTML = `
-        <div class="hero-image-container">
-          <img src="${hero.banner_image || ''}" alt="${hero.title || 'News'}" loading="lazy">
-        </div>
-        <div class="hero-content">
-          <h3><a href="${hero.url}" target="_blank">${hero.title}</a></h3>
-          <p>${truncateText(hero.summary)}</p>
-          <a href="${hero.url}" target="_blank">Read more</a>
-          <div class="news-time">${getRelativeTime(hero.time_published)}</div>
-        </div>
-      `;
-
-      articles.slice(1).forEach(article => {
-        const newsItem = document.createElement("div");
-        newsItem.className = "news-item";
-        newsItem.innerHTML = `
-          <div class="image-container">
-            <img src="${article.banner_image || ''}" alt="${article.title || 'News'}" loading="lazy">
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Financial News</title>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet"
+      />
+      <style>
+        :root {
+          --primary: #f0b90b;
+          --primary-dark: #d4a009;
+          --background: #1a1c24;
+          --card-bg: #21232c;
+          --text-primary: #ffffff;
+          --text-secondary: #d3d5db;
+          --border: #3a3e4a;
+        }
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          font-family: "Inter", sans-serif;
+          background-color: var(--background);
+          color: var(--text-primary);
+          padding: 2vw;
+          line-height: 1.6;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .container {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 2rem;
+          width: 100%;
+          flex: 1;
+        }
+        header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem 0;
+          margin-bottom: 2rem;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+        .nav-links {
+          display: flex;
+          gap: 1.5rem;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+        .nav-links a {
+          color: var(--primary);
+          text-decoration: none;
+          font-size: clamp(14px, 2.5vw, 16px);
+          font-weight: 500;
+          transition: color 0.3s ease;
+          cursor: pointer;
+        }
+        .nav-links a:hover {
+          color: var(--text-primary);
+        }
+        h1 {
+          font-size: clamp(24px, 5vw, 32px);
+          font-weight: 600;
+          color: var(--primary);
+          margin: 0 0 1.5rem;
+        }
+        .filter-bar {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 2rem;
+          flex-wrap: wrap;
+        }
+        .filter-group {
+          display: flex;
+          flex-direction: column;
+        }
+        .filter-group label {
+          font-size: clamp(14px, 2.5vw, 16px);
+          font-weight: 500;
+          color: var(--text-secondary);
+          margin-bottom: 0.5rem;
+        }
+        #tickers {
+          padding: 0.75rem;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          background: #2c2f3a;
+          color: var(--text-primary);
+          font-size: clamp(14px, 2.5vw, 16px);
+          width: 200px;
+        }
+        .topics {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          max-height: 150px;
+          overflow-y: auto;
+          padding: 0.5rem;
+          background: #2c2f3a;
+          border-radius: 8px;
+        }
+        .topic {
+          padding: 0.5rem 1rem;
+          background: #3a3e4a;
+          color: var(--text-secondary);
+          border: none;
+          border-radius: 8px;
+          font-size: clamp(12px, 2vw, 14px);
+          cursor: pointer;
+          transition: background 0.3s ease, color 0.3s ease;
+        }
+        .topic.active {
+          background: var(--primary);
+          color: var(--background);
+        }
+        button#apply-filters {
+          padding: 0.75rem 1.5rem;
+          background: var(--primary);
+          color: var(--background);
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 500;
+          font-size: clamp(14px, 2.5vw, 16px);
+          transition: background 0.3s ease;
+        }
+        button#apply-filters:hover {
+          background: var(--primary-dark);
+        }
+        .hero-article {
+          display: flex;
+          gap: 1.5rem;
+          background: var(--card-bg);
+          padding: 2rem;
+          border-radius: 8px;
+          margin-bottom: 2rem;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          transition: transform 0.3s ease;
+        }
+        .hero-article:hover {
+          transform: translateY(-5px);
+        }
+        .hero-image-container img {
+          width: 100%;
+          max-width: 400px;
+          height: auto;
+          max-height: 250px;
+          object-fit: cover;
+          border-radius: 8px;
+        }
+        .hero-content {
+          flex: 1;
+        }
+        .hero-content h3 a {
+          color: var(--primary);
+          font-size: clamp(20px, 4vw, 24px);
+          text-decoration: none;
+          transition: color 0.3s ease;
+        }
+        .hero-content h3 a:hover {
+          color: var(--primary-dark);
+        }
+        .hero-content p {
+          color: var(--text-secondary);
+          font-size: clamp(16px, 3vw, 18px);
+          margin-bottom: 1rem;
+        }
+        .hero-content a:not(h3 a) {
+          color: var(--primary);
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.3s ease;
+        }
+        .hero-content a:not(h3 a):hover {
+          color: var(--primary-dark);
+          text-decoration: underline;
+        }
+        .hero-content .news-time {
+          font-size: clamp(14px, 2.5vw, 16px);
+          color: #6c757d;
+        }
+        .news-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+        }
+        .news-item {
+          display: flex;
+          flex-direction: column;
+          background: var(--card-bg);
+          padding: 1.5rem;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          transition: transform 0.3s ease;
+        }
+        .news-item:hover {
+          transform: translateY(-5px);
+        }
+        .image-container img {
+          width: 100%;
+          height: 150px;
+          object-fit: cover;
+          border-radius: 8px;
+          margin-bottom: 1rem;
+        }
+        .content h3 a {
+          color: var(--primary);
+          font-size: clamp(16px, 3vw, 18px);
+          text-decoration: none;
+          transition: color 0.3s ease;
+        }
+        .content h3 a:hover {
+          color: var(--primary-dark);
+        }
+        .content p {
+          color: var(--text-secondary);
+          font-size: clamp(14px, 2.5vw, 16px);
+          margin-bottom: 0.75rem;
+        }
+        .content a:not(h3 a) {
+          color: var(--primary);
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.3s ease;
+        }
+        .content a:not(h3 a):hover {
+          color: var(--primary-dark);
+          text-decoration: underline;
+        }
+        .content .news-time {
+          font-size: clamp(12px, 2vw, 14px);
+          color: #6c757d;
+        }
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+          .container {
+            padding: 1.5rem;
+          }
+          .news-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 768px) {
+          body {
+            padding: 1rem;
+          }
+          .container {
+            padding: 1rem;
+          }
+          header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+          }
+          .nav-links {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: center;
+            width: 100%;
+          }
+          .news-grid {
+            grid-template-columns: 1fr;
+          }
+          .filter-bar {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .hero-article {
+            flex-direction: column;
+            padding: 1.5rem;
+          }
+          .hero-image-container img {
+            max-width: 100%;
+          }
+        }
+        @media (max-width: 480px) {
+          body {
+            padding: 0.5rem;
+          }
+          .container {
+            padding: 0.5rem;
+          }
+          h1 {
+            font-size: clamp(18px, 4vw, 24px);
+          }
+          .hero-article,
+          .news-item {
+            padding: 1rem;
+          }
+          .hero-content h3 a,
+          .content h3 a {
+            font-size: clamp(14px, 2.5vw, 16px);
+          }
+          .hero-content p,
+          .content p {
+            font-size: clamp(12px, 2vw, 14px);
+          }
+          #tickers {
+            width: 100%;
+          }
+          .image-container img {
+            height: 120px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <header>
+          <h1>Financial News</h1>
+          <div class="nav-links">
+            <a href="#" onclick="navigateTo('dashboard')">Dashboard</a>
+            <a href="#" onclick="navigateTo('home')">Home</a>
           </div>
-          <div class="content">
-            <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
-            <p>${truncateText(article.summary)}</p>
-            <a href="${article.url}" target="_blank">Read more</a>
-            <div class="news-time">${getRelativeTime(article.time_published)}</div>
+        </header>
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label for="tickers">Tickers</label>
+            <input type="text" id="tickers" placeholder="e.g., IBM,TSLA" />
           </div>
-        `;
-        newsList.appendChild(newsItem);
-      });
-    }
-
-    function toggleTopic(e) {
-      const topic = e.target.dataset.topic;
-      if (selectedTopics.has(topic)) {
-        selectedTopics.delete(topic);
-        e.target.classList.remove('active');
-      } else {
-        selectedTopics.add(topic);
-        e.target.classList.add('active');
-      }
-    }
-
-    document.querySelectorAll('.topic').forEach(btn => btn.addEventListener('click', toggleTopic));
-    document.getElementById('apply-filters').addEventListener('click', fetchNews);
-    document.addEventListener('DOMContentLoaded', fetchNews);
-
-    function navigateTo(page) {
-      alert(`Navigating to ${page}`);
-    }
-  </script>
-</body>
-</html>
+          <div class="filter-group">
+            <label>Topics</label>
+            <div class="topics">
+              <button class="topic" data-topic="blockchain">Blockchain</button>
+              <button class="topic" data-topic="earnings">Earnings</button>
+              <button class="topic" data-topic="ipo">IPO</button>
+              <button class="topic" data-topic="mergers_and_acquisitions">
+                Mergers & Acquisitions
+              </button>
+              <button class="topic" data-topic="financial_markets">
+                Financial Markets
+              </button>
+              <button class="topic" data-topic="economy_fiscal">
+                Economy - Fiscal Policy
+              </button>
+              <button class="topic" data-topic="economy_monetary">
+                Economy - Monetary Policy
+              </button>
+              <button class="topic" data-topic="economy_macro">
+                Economy - Macro/Overall
+              </button>
+              <button class="topic" data-topic="energy_transportation">
+                Energy & Transportation
+              </button>
+              <button class="topic" data-topic="finance">Finance</button>
+              <button class="topic" data-topic="life_sciences">
+                Life Sciences
+              </button>
+              <button class="topic" data-topic="manufacturing">
+                Manufacturing
+              </button>
+              <button class="topic" data-topic="real_estate">
+                Real Estate & Construction
+              </button>
+              <button class="topic" data-topic="retail_wholesale">
+                Retail & Wholesale
+              </button>
+              <button class="topic" data-topic="technology">Technology</button>
+            </div>
+          </div>
+          <button id="apply-filters">Apply Filters</button>
+        </div>
+        <div id="heroArticle" class="hero-article">
+          <p>Loading latest news...</p>
+        </div>
+        <div class="news-grid" id="newsList">
+          <p>Loading news...</p>
+        </div>
+      </div>
+      <script src="news.js"></script>
+    </body>
+  </html>
+</div>
