@@ -1,6 +1,5 @@
 const API_BASE_URL = "https://fantasy-back-1.onrender.com";
 
-
 let priceChart, financialBarChart, portfolioDoughnut;
 let portfolio = [];
 let financialTab = "income";
@@ -37,6 +36,14 @@ if (!token) {
 } else {
   localStorage.setItem("token", token);
   window.history.replaceState({}, document.title, "/index.html");
+}
+
+// Helper function to get auth headers
+function getAuthHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${isGuestMode ? guestId : token}`
+  };
 }
 
 function logout() {
@@ -250,8 +257,19 @@ async function fetchSuggestions(inputId, suggestionsId) {
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/stock/symbol-search?keywords=${query}`
+      `${API_BASE_URL}/api/stock/symbol-search?keywords=${query}`,
+      {
+        headers: getAuthHeaders()
+      }
     );
+    if (!response.ok) {
+      const errorData = await response.json();
+      if (response.status === 401 || response.status === 403) {
+        handleAuthError();
+        return;
+      }
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
     if (data["bestMatches"] && data["bestMatches"].length > 0) {
       const suggestions = data["bestMatches"]
@@ -279,6 +297,18 @@ function selectSuggestion(symbol, inputId, suggestionsId) {
   document.getElementById(suggestionsId).style.display = "none";
 }
 
+// Handle authentication errors globally
+function handleAuthError() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("guestMode");
+  localStorage.removeItem("guestPortfolioCount");
+  localStorage.removeItem("guestAnalysisCount");
+  localStorage.removeItem("guestId");
+  isGuestMode = false;
+  guestId = null;
+  window.location.href = "/login.html";
+}
+
 async function fetchFundamentals() {
   if (isGuestMode) {
     let analysisCount = parseInt(localStorage.getItem("guestAnalysisCount") || "0");
@@ -297,25 +327,69 @@ async function fetchFundamentals() {
 
   try {
     const overviewRes = await fetch(
-      `${API_BASE_URL}/api/stock/overview?symbol=${symbol}`
+      `${API_BASE_URL}/api/stock/overview?symbol=${symbol}`,
+      {
+        headers: getAuthHeaders()
+      }
     );
+    if (!overviewRes.ok) {
+      const errorData = await overviewRes.json();
+      if (overviewRes.status === 401 || overviewRes.status === 403) {
+        handleAuthError();
+        return;
+      }
+      throw new Error(errorData.error || `HTTP error! status: ${overviewRes.status}`);
+    }
     const overview = await overviewRes.json();
     if (overview["Error Message"] || !overview["Symbol"])
       throw new Error("Invalid symbol");
 
     const incomeRes = await fetch(
-      `${API_BASE_URL}/api/stock/income-statement?symbol=${symbol}`
+      `${API_BASE_URL}/api/stock/income-statement?symbol=${symbol}`,
+      {
+        headers: getAuthHeaders()
+      }
     );
+    if (!incomeRes.ok) {
+      const errorData = await incomeRes.json();
+      if (incomeRes.status === 401 || response.status === 403) {
+        handleAuthError();
+        return;
+      }
+      throw new Error(errorData.error || `HTTP error! status: ${incomeRes.status}`);
+    }
     const incomeData = await incomeRes.json();
 
     const balanceRes = await fetch(
-      `${API_BASE_URL}/api/stock/balance-sheet?symbol=${symbol}`
+      `${API_BASE_URL}/api/stock/balance-sheet?symbol=${symbol}`,
+      {
+        headers: getAuthHeaders()
+      }
     );
+    if (!balanceRes.ok) {
+      const errorData = await balanceRes.json();
+      if (balanceRes.status === 401 || response.status === 403) {
+        handleAuthError();
+        return;
+      }
+      throw new Error(errorData.error || `HTTP error! status: ${balanceRes.status}`);
+    }
     const balanceData = await balanceRes.json();
 
     const cashFlowRes = await fetch(
-      `${API_BASE_URL}/api/stock/cash-flow?symbol=${symbol}`
+      `${API_BASE_URL}/api/stock/cash-flow?symbol=${symbol}`,
+      {
+        headers: getAuthHeaders()
+      }
     );
+    if (!cashFlowRes.ok) {
+      const errorData = await cashFlowRes.json();
+      if (cashFlowRes.status === 401 || response.status === 403) {
+        handleAuthError();
+        return;
+      }
+      throw new Error(errorData.error || `HTTP error! status: ${cashFlowRes.status}`);
+    }
     const cashFlowData = await cashFlowRes.json();
 
     fundamentalsData = {
@@ -638,8 +712,19 @@ async function fetchPriceHistory(symbol, period) {
   if (period === "1year") {
     try {
       const intradayRes = await fetch(
-        `${API_BASE_URL}/api/stock/time-series-intraday?symbol=${symbol}&interval=5min`
+        `${API_BASE_URL}/api/stock/time-series-intraday?symbol=${symbol}&interval=5min`,
+        {
+          headers: getAuthHeaders()
+        }
       );
+      if (!intradayRes.ok) {
+        const errorData = await intradayRes.json();
+        if (intradayRes.status === 401 || intradayRes.status === 403) {
+          handleAuthError();
+          return;
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${intradayRes.status}`);
+      }
       const intradayData = await intradayRes.json();
       if (intradayData["Error Message"] || !intradayData["Meta Data"])
         throw new Error("Invalid symbol for intraday");
@@ -654,8 +739,19 @@ async function fetchPriceHistory(symbol, period) {
       prices.push(...last30Days);
 
       const dailyRes = await fetch(
-        `${API_BASE_URL}/api/stock/time-series-daily?symbol=${symbol}`
+        `${API_BASE_URL}/api/stock/time-series-daily?symbol=${symbol}`,
+        {
+          headers: getAuthHeaders()
+        }
       );
+      if (!dailyRes.ok) {
+        const errorData = await dailyRes.json();
+        if (dailyRes.status === 401 || dailyRes.status === 403) {
+          handleAuthError();
+          return;
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${dailyRes.status}`);
+      }
       const dailyData = await dailyRes.json();
       if (dailyData["Error Message"] || !dailyData["Time Series (Daily)"])
         throw new Error("Invalid symbol for daily");
@@ -681,8 +777,19 @@ async function fetchPriceHistory(symbol, period) {
     const interval = period === "5year" ? "weekly" : "monthly";
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/stock/${timeSeries}?symbol=${symbol}`
+        `${API_BASE_URL}/api/stock/${timeSeries}?symbol=${symbol}`,
+        {
+          headers: getAuthHeaders()
+        }
       );
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+          return;
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       if (data["Error Message"] || !data["Meta Data"])
         throw new Error("Invalid symbol");
@@ -708,119 +815,6 @@ async function fetchPriceHistory(symbol, period) {
   labels = prices.map((p) => p.date).reverse();
   priceData = prices.map((p) => p.price).reverse();
   initPriceChart(priceData, labels);
-}
-
-function updateFinancialChart() {
-  let financialData;
-  const yearlyData = fundamentalsData.financials.yearly[financialTab];
-  const quarterlyData =
-    fundamentalsData.financials.quarterly[financialTab];
-
-  if (financialPeriod === "10year") {
-    const years = Object.keys(yearlyData).sort();
-    if (financialTab === "income") {
-      financialData = {
-        labels: years,
-        revenue: years.map((year) => yearlyData[year].revenue),
-        netIncome: years.map((year) => yearlyData[year].netIncome),
-        netDebt: years.map((year) => yearlyData[year].netDebt),
-      };
-    } else if (financialTab === "balance") {
-      financialData = {
-        labels: years,
-        totalAssets: years.map((year) => yearlyData[year].totalAssets),
-        totalLiabilities: years.map(
-          (year) => yearlyData[year].totalLiabilities
-        ),
-        cashOnHand: years.map((year) => yearlyData[year].cashOnHand),
-      };
-    } else {
-      financialData = {
-        labels: years,
-        investingCashFlow: years.map(
-          (year) => yearlyData[year].investingCashFlow
-        ),
-        financingCashFlow: years.map(
-          (year) => yearlyData[year].financingCashFlow
-        ),
-        freeCashFlow: years.map((year) => yearlyData[year].freeCashFlow),
-      };
-    }
-  } else if (financialPeriod === "5year") {
-    const years = Object.keys(yearlyData).slice(-5).sort();
-    if (financialTab === "income") {
-      financialData = {
-        labels: years,
-        revenue: years.map((year) => yearlyData[year].revenue),
-        netIncome: years.map((year) => yearlyData[year].netIncome),
-        netDebt: years.map((year) => yearlyData[year].netDebt),
-      };
-    } else if (financialTab === "balance") {
-      financialData = {
-        labels: years,
-        totalAssets: years.map((year) => yearlyData[year].totalAssets),
-        totalLiabilities: years.map(
-          (year) => yearlyData[year].totalLiabilities
-        ),
-        cashOnHand: years.map((year) => yearlyData[year].cashOnHand),
-      };
-    } else {
-      financialData = {
-        labels: years,
-        investingCashFlow: years.map(
-          (year) => yearlyData[year].investingCashFlow
-        ),
-        financingCashFlow: years.map(
-          (year) => yearlyData[year].financingCashFlow
-        ),
-        freeCashFlow: years.map((year) => yearlyData[year].freeCashFlow),
-      };
-    }
-  } else {
-    const quarters = Object.keys(quarterlyData).sort();
-    const cutoffDate = new Date("2025-04-23");
-    cutoffDate.setFullYear(cutoffDate.getFullYear() - 2);
-    const filteredQuarters = quarters.filter(
-      (q) => new Date(q) >= cutoffDate
-    );
-    if (financialTab === "income") {
-      financialData = {
-        labels: filteredQuarters,
-        revenue: filteredQuarters.map((q) => quarterlyData[q].revenue),
-        netIncome: filteredQuarters.map(
-          (q) => quarterlyData[q].netIncome
-        ),
-        netDebt: filteredQuarters.map((q) => quarterlyData[q].netDebt),
-      };
-    } else if (financialTab === "balance") {
-      financialData = {
-        labels: filteredQuarters,
-        totalAssets: filteredQuarters.map(
-          (q) => quarterlyData[q].totalAssets
-        ),
-        totalLiabilities: filteredQuarters.map(
-          (q) => quarterlyData[q].totalLiabilities
-        ),
-        cashOnHand: filteredQuarters.map(
-          (q) => quarterlyData[q].cashOnHand
-        ),
-      };
-    } else {
-      financialData = {
-        labels: filteredQuarters,
-        investingCashFlow: filteredQuarters.map(
-          (q) => quarterlyData[q].investingCashFlow
-        ),
-        financingCashFlow: filteredQuarters.map(
-          (q) => quarterlyData[q].financingCashFlow
-        ),
-        freeCashFlow: filteredQuarters.map(
-          (q) => quarterlyData[q].freeCashFlow
-        ),
-      };
-    }
-  }
-  initFinancialBarChart(financialData);
 }
 
 function toggleFinancialUnit() {
@@ -869,11 +863,14 @@ async function migrateGuestPortfolio() {
       });
       if (!response.ok) {
         const errorData = await response.json();
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+          return;
+        }
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
       const result = await response.json();
       console.log("Migration result:", result);
-      // Clear guest mode flag and reset guestId after migration
       localStorage.removeItem("guestMode");
       localStorage.removeItem("guestPortfolioCount");
       localStorage.removeItem("guestAnalysisCount");
@@ -913,8 +910,19 @@ async function addToPortfolio() {
   } else {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/stock/global-quote?symbol=${symbol}`
+        `${API_BASE_URL}/api/stock/global-quote?symbol=${symbol}`,
+        {
+          headers: getAuthHeaders()
+        }
       );
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+          return;
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       if (data["Error Message"] || !data["Global Quote"]) {
         throw new Error("Invalid symbol");
@@ -934,14 +942,7 @@ async function addToPortfolio() {
   };
 
   try {
-    const headers = {
-      "Content-Type": "application/json",
-    };
-    if (isGuestMode) {
-      headers["Authorization"] = `Bearer ${guestId}`;
-    } else {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
+    const headers = getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/api/portfolio`, {
       method: "POST",
       headers,
@@ -949,6 +950,10 @@ async function addToPortfolio() {
     });
     if (!response.ok) {
       const errorData = await response.json();
+      if (response.status === 401 || response.status === 403) {
+        handleAuthError();
+        return;
+      }
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     const result = await response.json();
@@ -967,9 +972,7 @@ async function addToPortfolio() {
 
 async function deleteFromPortfolio(stockId, symbol) {
   try {
-    const headers = isGuestMode
-      ? { Authorization: `Bearer ${guestId}` }
-      : { Authorization: `Bearer ${token}` };
+    const headers = getAuthHeaders();
     const response = await fetch(
       `${API_BASE_URL}/api/portfolio/${stockId}`,
       {
@@ -979,6 +982,10 @@ async function deleteFromPortfolio(stockId, symbol) {
     );
     if (!response.ok) {
       const errorData = await response.json();
+      if (response.status === 401 || response.status === 403) {
+        handleAuthError();
+        return;
+      }
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     portfolio = portfolio.filter((stock) => stock._id !== stockId);
@@ -1017,8 +1024,19 @@ async function updatePortfolio() {
   for (const stock of portfolio) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/stock/global-quote?symbol=${stock.symbol}`
+        `${API_BASE_URL}/api/stock/global-quote?symbol=${stock.symbol}`,
+        {
+          headers: getAuthHeaders()
+        }
       );
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+          return;
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       if (data["Error Message"] || !data["Global Quote"]) continue;
 
@@ -1081,29 +1099,23 @@ async function updatePortfolio() {
 
 async function loadPortfolio() {
   try {
-    // First, migrate any guest portfolio data if the user is logged in
     await migrateGuestPortfolio();
-
-    const headers = {
-      "Content-Type": "application/json",
-    };
-    if (isGuestMode) {
-      headers["Authorization"] = `Bearer ${guestId}`;
-    } else {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-    console.log("Loading portfolio with headers:", headers); // Debug log
+    const headers = getAuthHeaders();
+    console.log("Loading portfolio with headers:", headers);
     const response = await fetch(`${API_BASE_URL}/api/portfolio`, {
       method: "GET",
       headers,
     });
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("Portfolio fetch error response:", errorData); // Debug log
+      if (response.status === 401 || response.status === 403) {
+        handleAuthError();
+        return;
+      }
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     portfolio = await response.json();
-    console.log("Portfolio loaded:", portfolio); // Debug log
+    console.log("Portfolio loaded:", portfolio);
     updatePortfolio();
   } catch (error) {
     alert("Error loading portfolio: " + error.message);
@@ -1111,7 +1123,6 @@ async function loadPortfolio() {
   }
 }
 
-// Toggle manual price input visibility
 function toggleManualPriceInput() {
   const priceType = document.getElementById("priceType").value;
   const manualPriceInput = document.getElementById("manualPrice");
@@ -1129,11 +1140,13 @@ document.getElementById("pricePeriod").addEventListener("change", () => {
     );
 });
 
-// Attach event listener for priceType select
 document.getElementById("priceType").addEventListener("change", toggleManualPriceInput);
 
 async function init() {
-  // Initialize manual price input visibility
+  if (!token && !localStorage.getItem("guestId")) {
+    window.location.href = "/login.html";
+    return;
+  }
   toggleManualPriceInput();
   await loadPortfolio();
   initPriceChart();
