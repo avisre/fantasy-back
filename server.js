@@ -20,7 +20,7 @@ const {
   JWT_SECRET,
   ALPHA_VANTAGE_API_KEY,
   SESSION_SECRET,
-  PORT,
+  PORT = 3000,
 } = process.env;
 
 const app = express();
@@ -35,6 +35,8 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 // MongoDB Schemas and Models
@@ -141,6 +143,17 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
+// Serve favicon explicitly
+app.get('/favicon.ico', (req, res) => {
+  res.set('Content-Type', 'image/x-icon');
+  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'), (err) => {
+    if (err) {
+      // Fallback to redirecting to the favicon specified in login.html
+      res.redirect('/media/use.png');
+    }
+  });
+});
+
 // Authentication Routes
 app.post('/api/register', async (req, res) => {
   try {
@@ -186,16 +199,47 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
-  const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
-  res.redirect(`/dashboard.html?token=${token}`);
+app.get('/auth/google/callback', (req, res, next) => {
+  passport.authenticate('google', (err, user, info) => {
+    if (err) {
+      console.error('Google Auth Error:', err);
+      return res.status(401).json({ error: 'Google authentication failed', details: err.message });
+    }
+    if (!user) {
+      return res.redirect('/login.html?error=auth_failed');
+    }
+    req.logIn(user, (loginErr) => {
+      if (loginErr) {
+        console.error('Login Error:', loginErr);
+        return res.status(500).json({ error: 'Login failed after Google authentication' });
+      }
+      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+      res.redirect(`/dashboard.html?token=${token}`);
+    });
+  })(req, res, next);
 });
 
-// Twitter OAuth Routes
+// Twitter OAuth Routes with Error Handling
 app.get('/auth/twitter', passport.authenticate('twitter', { scope: ['email'] }));
-app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/login.html' }), (req, res) => {
-  const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
-  res.redirect(`/dashboard.html?token=${token}`);
+
+app.get('/auth/twitter/callback', (req, res, next) => {
+  passport.authenticate('twitter', (err, user, info) => {
+    if (err) {
+      console.error('Twitter Auth Error:', err);
+      return res.status(401).json({ error: 'Twitter authentication failed', details: err.message });
+    }
+    if (!user) {
+      return res.redirect('/login.html?error=auth_failed');
+    }
+    req.logIn(user, (loginErr) => {
+      if (loginErr) {
+        console.error('Login Error:', loginErr);
+        return res.status(500).json({ error: 'Login failed after Twitter authentication' });
+      }
+      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+      res.redirect(`/dashboard.html?token=${token}`);
+    });
+  })(req, res, next);
 });
 
 // Portfolio Routes
@@ -494,5 +538,7 @@ app.use((err, req, res, next) => {
 // Start Server
 app.listen(PORT, () => {
   console.log('Server Time:', new Date().toISOString());
+  console.log('Twitter Consumer Key:', process.env.TWITTER_CONSUMER_KEY);
+  console.log('Twitter Consumer Secret:', process.env.TWITTER_CONSUMER_SECRET);
   console.log(`Server running on port ${PORT}`);
 });
