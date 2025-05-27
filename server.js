@@ -425,7 +425,9 @@ app.get('/dashboard.html', authenticateToken, (req, res) => {
 app.get('/register.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
-
+app.get('/news.html', authenticateToken, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'news.html'));
+});
 app.get('/index.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
