@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String },
   googleId: { type: String },
-  twitterId: { type: String }, // Added for Twitter OAuth
+  twitterId: { type: String },
 });
 const User = mongoose.model('User', userSchema);
 
@@ -91,6 +91,7 @@ passport.use(new GoogleStrategy({
     }
     done(null, user);
   } catch (err) {
+    console.error('Google OAuth Error:', err);
     done(err, null);
   }
 }));
@@ -103,6 +104,7 @@ passport.use(new TwitterStrategy({
   includeEmail: true,
 }, async (token, tokenSecret, profile, done) => {
   try {
+    console.log('Twitter Profile:', profile);
     let user = await User.findOne({ twitterId: profile.id });
     if (!user) {
       user = new User({
@@ -113,6 +115,7 @@ passport.use(new TwitterStrategy({
     }
     done(null, user);
   } catch (err) {
+    console.error('Twitter OAuth Error:', err);
     done(err, null);
   }
 }));
@@ -482,5 +485,14 @@ app.get('/index.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err.stack);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 // Start Server
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log('Server Time:', new Date().toISOString());
+  console.log(`Server running on port ${PORT}`);
+});
