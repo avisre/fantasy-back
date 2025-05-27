@@ -1,19 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Login page loaded');
+  console.log('Landing page loaded');
 
   // Add handler for Google OAuth login
   const googleLoginButton = document.getElementById('googleLoginButton');
   if (googleLoginButton) {
     googleLoginButton.addEventListener('click', () => {
-      window.location.href = 'https://fantasy-back-1.onrender.com/auth/google';
-    });
-  }
-
-  // Add handler for Twitter OAuth login
-  const twitterLoginButton = document.getElementById('twitterLoginButton');
-  if (twitterLoginButton) {
-    twitterLoginButton.addEventListener('click', () => {
-      window.location.href = 'https://fantasy-back-1.onrender.com/auth/twitter';
+      window.location.href = 'https://fantasy-back.onrender.com/auth/google';
     });
   }
 
@@ -23,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     guestModeButton.addEventListener('click', enterGuestMode);
   }
 
-  // Add handler for logout (if present)
+  // Add handler for logout
   const logoutButton = document.querySelector('.logout-btn');
   if (logoutButton) {
     logoutButton.addEventListener('click', () => {
@@ -36,23 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-// Global fetch wrapper to handle token expiry
-async function fetchWithToken(url, options = {}) {
-  const token = localStorage.getItem('token');
-  const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
-  const response = await fetch(url, { ...options, headers });
-  if (response.status === 403) {
-    const data = await response.json();
-    if (data.error === 'Invalid or expired token') {
-      alert('Your session has expired. Please log in again.');
-      localStorage.removeItem('token');
-      window.location.href = '/login.html';
-      return null;
-    }
-  }
-  return response;
-}
 
 async function login() {
   const email = document.getElementById("email").value;
