@@ -1,14 +1,89 @@
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Financial News</title>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
-        rel="stylesheet"
-      />
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Standard SEO Meta Tags -->
+    <meta name="description" content="Welcome to stockportfolio.pro, your platform for visualizing US stock performance and analyzing fundamental data with advanced tools. Get started today!" />
+    <meta name="keywords" content="stock portfolio, US stocks, stock visualization, stock fundamentals, financial analysis, investment platform, portfolio management" />
+    <meta name="author" content="stockportfolio.pro" />
+    <meta name="robots" content="index, follow" />
+    <!-- Open Graph Meta Tags (for social media and AI crawlers) -->
+    <meta property="og:title" content="stockportfolio.pro - Visualize US Stock Performance" />
+    <meta property="og:description" content="Discover stockportfolio.pro, the ultimate platform to visualize US stock performance, analyze fundamentals, and manage your portfolio with powerful tools." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.stockportfolio.pro/" />
+    <meta property="og:image" content="https://www.stockportfolio.pro/media/success.png" />
+    <meta property="og:site_name" content="stockportfolio.pro" />
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="stockportfolio.pro - Visualize US Stock Performance" />
+    <meta name="twitter:description" content="Join stockportfolio.pro to visualize US stock performance, analyze fundamentals, and track your portfolio with cutting-edge tools." />
+    <meta name="twitter:image" content="https://www.stockportfolio.pro/media/success.png" />
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R5X6MKH91S"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+      gtag('config', 'G-R5X6MKH91S');
+    </script>
+    <script type='text/javascript'>
+  window.smartlook||(function(d) {
+    var o=smartlook=function(){ o.api.push(arguments)},h=d.getElementsByTagName('head')[0];
+    var c=d.createElement('script');o.api=new Array();c.async=true;c.type='text/javascript';
+    c.charset='utf-8';c.src='https://web-sdk.smartlook.com/recorder.js';h.appendChild(c);
+    })(document);
+    smartlook('init', '3fbd9c6def26eaafbf1b4bca61a0b845b3fc7a13', { region: 'eu' });
+</script>
+    <!-- Structured Data (JSON-LD) for context -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "stockportfolio.pro - Welcome",
+        "description": "Welcome to stockportfolio.pro, a platform for visualizing US stock performance, analyzing fundamental data, and managing investment portfolios.",
+        "url": "https://www.stockportfolio.pro/",
+        "publisher": {
+          "@type": "Organization",
+          "name": "stockportfolio.pro",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.stockportfolio.pro/media/success.png"
+          }
+        },
+        "mainEntity": {
+          "@type": "WebApplication",
+          "name": "stockportfolio.pro",
+          "applicationCategory": "FinanceApplication",
+          "featureList": [
+            "Visualize US stock performance",
+            "Analyze fundamental data of US stocks",
+            "Portfolio management and performance tracking",
+            "Interactive charts for price history and portfolio breakdown",
+            "Secure authentication with email or social media",
+            "Responsive design for all devices"
+          ],
+          "operatingSystem": "Web"
+        }
+      }
+    </script>
+    <title>Financial News</title>
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="/media/use.png"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
       <style>
         :root {
           --primary: #f0b90b;
@@ -318,8 +393,8 @@
         <header>
           <h1>Financial News</h1>
           <div class="nav-links">
-            <a href="/dashboard.html">Dashboard</a>
-            <a href="/index.html">Home</a>
+            <a href="#" onclick="navigateTo('dashboard')">Dashboard</a>
+            <a href="#" onclick="navigateTo('home')">Home</a>
           </div>
         </header>
         <div class="filter-bar">
