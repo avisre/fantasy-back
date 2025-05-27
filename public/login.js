@@ -37,6 +37,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Global fetch wrapper to handle token expiry
+async function fetchWithToken(url, options = {}) {
+  const token = localStorage.getItem('token');
+  const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
+  const response = await fetch(url, { ...options, headers });
+  if (response.status === 403) {
+    const data = await response.json();
+    if (data.error === 'Invalid or expired token') {
+      alert('Your session has expired. Please log in again.');
+      localStorage.removeItem('token');
+      window.location.href = '/login.html';
+      return null;
+    }
+  }
+  return response;
+}
+
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
