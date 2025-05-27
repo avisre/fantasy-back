@@ -21,24 +21,20 @@ const {
 } = process.env;
 
 const app = express();
+
+// Middleware setup
 app.use(cors({ origin: 'https://www.stockportfolio.pro', credentials: true }));
 app.use(express.json());
-
-// Session middleware
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
 }));
-
-// Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// MongoDB Schemas
+// MongoDB Schemas and Models
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String },
@@ -60,7 +56,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Passport Serialization
+// Passport Serialization and Deserialization
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
@@ -95,7 +91,7 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-// Middleware to verify JWT or handle guest mode
+// Authentication Middleware
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -116,7 +112,7 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-// API Routes - Authentication
+// Authentication Routes
 app.post('/api/register', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -160,14 +156,13 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Google OAuth Routes
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
   const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
   res.redirect(`/dashboard.html?token=${token}`);
 });
 
-// API Routes - Portfolio
+// Portfolio Routes
 app.get('/api/portfolio', authenticateToken, async (req, res) => {
   try {
     console.log('Fetching portfolio for userId:', req.user.id);
@@ -238,7 +233,7 @@ app.post('/api/portfolio/migrate', authenticateToken, async (req, res) => {
   }
 });
 
-// API Routes - Stock Data (Alpha Vantage Proxy)
+// Stock Data Routes (Alpha Vantage Proxy)
 app.get('/api/stock/symbol-search', async (req, res) => {
   try {
     const { keywords } = req.query;
@@ -409,7 +404,24 @@ app.get('/api/stock/global-quote', async (req, res) => {
   }
 });
 
-// Serve Pages
+// News Route
+app.get('/api/news', authenticateToken, async (req, res) => {
+  try {
+    const response = await fetch(
+      `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&apikey=${ALPHA_VANTAGE_API_KEY}`
+    );
+    if (!response.ok) {
+      throw new Error(`Alpha Vantage API responded with status: ${response.status}`);
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching news:', error.message);
+    res.status(500).json({ error: 'Failed to fetch news data' });
+  }
+});
+
+// Static Page Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
 });
@@ -425,9 +437,11 @@ app.get('/dashboard.html', authenticateToken, (req, res) => {
 app.get('/register.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
+
 app.get('/news.html', authenticateToken, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'news.html'));
 });
+
 app.get('/index.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
