@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const TwitterStrategy = require('passport-twitter').Strategy;
 const session = require('express-session');
 require('dotenv').config();
 
@@ -14,6 +15,8 @@ const {
   MONGODB_URI,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
+  TWITTER_CONSUMER_KEY,
+  TWITTER_CONSUMER_SECRET,
   JWT_SECRET,
   ALPHA_VANTAGE_API_KEY,
   SESSION_SECRET,
@@ -39,6 +42,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String },
   googleId: { type: String },
+  twitterId: { type: String }, // Added for Twitter OAuth
 });
 const User = mongoose.model('User', userSchema);
 
@@ -82,6 +86,28 @@ passport.use(new GoogleStrategy({
       user = new User({
         email: profile.emails[0].value,
         googleId: profile.id,
+      });
+      await user.save();
+    }
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+}));
+
+// Twitter OAuth Strategy
+passport.use(new TwitterStrategy({
+  consumerKey: TWITTER_CONSUMER_KEY,
+  consumerSecret: TWITTER_CONSUMER_SECRET,
+  callbackURL: 'https://www.stockportfolio.pro/auth/twitter/callback',
+  includeEmail: true,
+}, async (token, tokenSecret, profile, done) => {
+  try {
+    let user = await User.findOne({ twitterId: profile.id });
+    if (!user) {
+      user = new User({
+        email: profile.emails?.[0]?.value || `${profile.id}@twitter.com`,
+        twitterId: profile.id,
       });
       await user.save();
     }
@@ -158,6 +184,13 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
+  const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
+  res.redirect(`/dashboard.html?token=${token}`);
+});
+
+// Twitter OAuth Routes
+app.get('/auth/twitter', passport.authenticate('twitter', { scope: ['email'] }));
+app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/login.html' }), (req, res) => {
   const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
   res.redirect(`/dashboard.html?token=${token}`);
 });
