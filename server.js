@@ -6,7 +6,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const TwitterStrategy = require('passport-twitter').Strategy;
 const session = require('express-session');
 require('dotenv').config();
 
@@ -15,12 +14,10 @@ const {
   MONGODB_URI,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  TWITTER_CONSUMER_KEY,
-  TWITTER_CONSUMER_SECRET,
   JWT_SECRET,
   ALPHA_VANTAGE_API_KEY,
   SESSION_SECRET,
-  PORT = 3000,
+  PORT,
 } = process.env;
 
 const app = express();
@@ -35,8 +32,6 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 // MongoDB Schemas and Models
@@ -44,7 +39,6 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String },
   googleId: { type: String },
-  twitterId: { type: String },
 });
 const User = mongoose.model('User', userSchema);
 
@@ -93,31 +87,6 @@ passport.use(new GoogleStrategy({
     }
     done(null, user);
   } catch (err) {
-    console.error('Google OAuth Error:', err);
-    done(err, null);
-  }
-}));
-
-// Twitter OAuth Strategy
-passport.use(new TwitterStrategy({
-  consumerKey: TWITTER_CONSUMER_KEY,
-  consumerSecret: TWITTER_CONSUMER_SECRET,
-  callbackURL: 'https://www.stockportfolio.pro/auth/twitter/callback',
-  includeEmail: true,
-}, async (token, tokenSecret, profile, done) => {
-  try {
-    console.log('Twitter Profile:', profile);
-    let user = await User.findOne({ twitterId: profile.id });
-    if (!user) {
-      user = new User({
-        email: profile.emails?.[0]?.value || `${profile.id}@twitter.com`,
-        twitterId: profile.id,
-      });
-      await user.save();
-    }
-    done(null, user);
-  } catch (err) {
-    console.error('Twitter OAuth Error:', err);
     done(err, null);
   }
 }));
@@ -142,17 +111,6 @@ const authenticateToken = async (req, res, next) => {
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 };
-
-// Serve favicon explicitly
-app.get('/favicon.ico', (req, res) => {
-  res.set('Content-Type', 'image/x-icon');
-  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'), (err) => {
-    if (err) {
-      // Fallback to redirecting to the favicon specified in login.html
-      res.redirect('/media/use.png');
-    }
-  });
-});
 
 // Authentication Routes
 app.post('/api/register', async (req, res) => {
@@ -199,47 +157,9 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', (req, res, next) => {
-  passport.authenticate('google', (err, user, info) => {
-    if (err) {
-      console.error('Google Auth Error:', err);
-      return res.status(401).json({ error: 'Google authentication failed', details: err.message });
-    }
-    if (!user) {
-      return res.redirect('/login.html?error=auth_failed');
-    }
-    req.logIn(user, (loginErr) => {
-      if (loginErr) {
-        console.error('Login Error:', loginErr);
-        return res.status(500).json({ error: 'Login failed after Google authentication' });
-      }
-      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
-      res.redirect(`/dashboard.html?token=${token}`);
-    });
-  })(req, res, next);
-});
-
-// Twitter OAuth Routes with Error Handling
-app.get('/auth/twitter', passport.authenticate('twitter', { scope: ['email'] }));
-
-app.get('/auth/twitter/callback', (req, res, next) => {
-  passport.authenticate('twitter', (err, user, info) => {
-    if (err) {
-      console.error('Twitter Auth Error:', err);
-      return res.status(401).json({ error: 'Twitter authentication failed', details: err.message });
-    }
-    if (!user) {
-      return res.redirect('/login.html?error=auth_failed');
-    }
-    req.logIn(user, (loginErr) => {
-      if (loginErr) {
-        console.error('Login Error:', loginErr);
-        return res.status(500).json({ error: 'Login failed after Twitter authentication' });
-      }
-      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
-      res.redirect(`/dashboard.html?token=${token}`);
-    });
-  })(req, res, next);
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
+  const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '1h' });
+  res.redirect(`/dashboard.html?token=${token}`);
 });
 
 // Portfolio Routes
@@ -529,16 +449,5 @@ app.get('/index.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Error Handling Middleware
-app.use((err, req, res, next) => {
-  console.error('Unhandled Error:', err.stack);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
 // Start Server
-app.listen(PORT, () => {
-  console.log('Server Time:', new Date().toISOString());
-  console.log('Twitter Consumer Key:', process.env.TWITTER_CONSUMER_KEY);
-  console.log('Twitter Consumer Secret:', process.env.TWITTER_CONSUMER_SECRET);
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
