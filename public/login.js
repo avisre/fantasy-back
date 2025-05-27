@@ -1,11 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Landing page loaded');
+  console.log('Login page loaded');
 
   // Add handler for Google OAuth login
   const googleLoginButton = document.getElementById('googleLoginButton');
   if (googleLoginButton) {
     googleLoginButton.addEventListener('click', () => {
-      window.location.href = 'https://fantasy-back.onrender.com/auth/google';
+      window.location.href = 'https://fantasy-back-1.onrender.com/auth/google';
+    });
+  }
+
+  // Add handler for Twitter OAuth login
+  const twitterLoginButton = document.getElementById('twitterLoginButton');
+  if (twitterLoginButton) {
+    twitterLoginButton.addEventListener('click', () => {
+      window.location.href = 'https://fantasy-back-1.onrender.com/auth/twitter';
     });
   }
 
@@ -15,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     guestModeButton.addEventListener('click', enterGuestMode);
   }
 
-  // Add handler for logout
+  // Add handler for logout (if present)
   const logoutButton = document.querySelector('.logout-btn');
   if (logoutButton) {
     logoutButton.addEventListener('click', () => {
